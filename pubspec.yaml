@@ -41,6 +41,9 @@ dependencies:
   # Dependency Injection
   get_it: ^7.7.0
 
+  # Freezed for immutable classes
+  freezed_annotation: ^2.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -51,6 +54,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+
+  # Code generation
+  build_runner: ^2.4.8
+  freezed: ^2.4.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
