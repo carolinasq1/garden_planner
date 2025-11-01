@@ -13,7 +13,8 @@ class TasksPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TaskBloc(getAllTasksUseCase: di.getIt()),
+      create: (context) =>
+          TaskBloc(getAllTasksUseCase: di.getIt(), editTaskUseCase: di.getIt()),
       child: Scaffold(
         appBar: AppBar(title: const Text('Garden Tasks')),
         body: BlocBuilder<TaskBloc, TaskState>(
