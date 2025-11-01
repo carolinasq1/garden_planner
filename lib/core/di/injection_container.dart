@@ -9,7 +9,6 @@ import '../../domain/use_cases/create_task_use_case.dart';
 import '../../domain/use_cases/delete_task_use_case.dart';
 import '../../domain/use_cases/edit_task_use_case.dart';
 import '../../domain/use_cases/get_all_tasks_use_case.dart';
-import '../utils/mock_data.dart';
 
 final getIt = GetIt.instance;
 
