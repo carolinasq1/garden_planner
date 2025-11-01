@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/task.dart';
 import '../../domain/use_cases/get_all_tasks_use_case.dart';
 import '../../domain/use_cases/edit_task_use_case.dart';
+import '../../domain/use_cases/delete_task_use_case.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';
@@ -9,11 +10,16 @@ part 'task_state.dart';
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final GetAllTasksUseCase getAllTasksUseCase;
   final EditTaskUseCase editTaskUseCase;
+  final DeleteTaskUseCase deleteTaskUseCase;
 
-  TaskBloc({required this.getAllTasksUseCase, required this.editTaskUseCase})
-    : super(TaskLoading()) {
+  TaskBloc({
+    required this.getAllTasksUseCase,
+    required this.editTaskUseCase,
+    required this.deleteTaskUseCase,
+  }) : super(TaskLoading()) {
     on<GetTasksEvent>(_onGetTasks);
     on<ToggleTaskCompletedEvent>(_onToggleTaskCompleted);
+    on<DeleteTaskEvent>(_onDeleteTask);
 
     // Automatically load tasks when BLoC is created
     add(GetTasksEvent());
@@ -39,6 +45,19 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         updatedAt: DateTime.now(),
       );
       await editTaskUseCase.call(updatedTask);
+      // Refresh the list
+      add(GetTasksEvent());
+    } catch (e) {
+      emit(TaskError(e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteTask(
+    DeleteTaskEvent event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      await deleteTaskUseCase.call(event.taskId);
       // Refresh the list
       add(GetTasksEvent());
     } catch (e) {

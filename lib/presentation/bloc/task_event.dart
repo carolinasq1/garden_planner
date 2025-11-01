@@ -9,3 +9,9 @@ class ToggleTaskCompletedEvent extends TaskEvent {
 
   ToggleTaskCompletedEvent(this.task);
 }
+
+class DeleteTaskEvent extends TaskEvent {
+  final String taskId;
+
+  DeleteTaskEvent(this.taskId);
+}
