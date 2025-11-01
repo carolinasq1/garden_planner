@@ -1,17 +1,15 @@
-class Task {
-  final String id;
-  final String name;
-  final String? description;
-  final bool isCompleted;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Task({
-    required this.id,
-    required this.name,
-    this.description,
-    this.isCompleted = false,
-    required this.createdAt,
-    this.updatedAt,
-  });
+part 'task.freezed.dart';
+
+@freezed
+class Task with _$Task {
+  const factory Task({
+    required String id,
+    required String name,
+    String? description,
+    @Default(false) bool isCompleted,
+    required DateTime createdAt,
+    DateTime? updatedAt,
+  }) = _Task;
 }
