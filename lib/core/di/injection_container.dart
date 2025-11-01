@@ -9,6 +9,7 @@ import '../../domain/use_cases/create_task_use_case.dart';
 import '../../domain/use_cases/delete_task_use_case.dart';
 import '../../domain/use_cases/edit_task_use_case.dart';
 import '../../domain/use_cases/get_all_tasks_use_case.dart';
+import '../utils/mock_data.dart';
 
 final getIt = GetIt.instance;
 
@@ -37,4 +38,12 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton(() => GetAllTasksUseCase(getIt()));
   getIt.registerLazySingleton(() => EditTaskUseCase(getIt()));
   getIt.registerLazySingleton(() => DeleteTaskUseCase(getIt()));
+
+  // Add mock data if box is empty
+  if (taskBox.isEmpty) {
+    final mockTasks = getMockTasks();
+    for (final task in mockTasks) {
+      await dataSource.createTask(task);
+    }
+  }
 }
