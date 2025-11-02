@@ -15,3 +15,9 @@ class DeleteTaskEvent extends TaskEvent {
 
   DeleteTaskEvent(this.taskId);
 }
+
+class CreateTaskEvent extends TaskEvent {
+  final Task task;
+
+  CreateTaskEvent(this.task);
+}
