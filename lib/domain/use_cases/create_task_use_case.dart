@@ -6,7 +6,15 @@ class CreateTaskUseCase {
 
   CreateTaskUseCase(this.repository);
 
-  Future<void> call(Task task) async {
-    return await repository.createTask(task);
+  Future<void> call(String name, String? description) async {
+    final newTask = Task(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      description: description,
+      isCompleted: false,
+      createdAt: DateTime.now(),
+    );
+
+    return await repository.createTask(newTask);
   }
 }

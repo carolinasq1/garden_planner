@@ -17,9 +17,10 @@ class DeleteTaskEvent extends TaskEvent {
 }
 
 class CreateTaskEvent extends TaskEvent {
-  final Task task;
+  final String name;
+  final String? description;
 
-  CreateTaskEvent(this.task);
+  CreateTaskEvent(this.name, this.description);
 }
 
 class EditTaskEvent extends TaskEvent {

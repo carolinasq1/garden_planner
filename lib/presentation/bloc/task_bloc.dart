@@ -75,7 +75,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     Emitter<TaskState> emit,
   ) async {
     try {
-      await createTaskUseCase.call(event.task);
+      await createTaskUseCase.call(event.name, event.description);
       // Refresh the list
       add(GetTasksEvent());
     } catch (e) {

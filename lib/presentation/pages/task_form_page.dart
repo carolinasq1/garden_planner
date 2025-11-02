@@ -54,15 +54,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
   }
 
   void _createTask(String name, String? description) {
-    final newTask = Task(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name,
-      description: description,
-      isCompleted: false,
-      createdAt: DateTime.now(),
-    );
-
-    context.read<TaskBloc>().add(CreateTaskEvent(newTask));
+    context.read<TaskBloc>().add(CreateTaskEvent(name, description));
   }
 
   void _updateTask(String name, String? description) {
