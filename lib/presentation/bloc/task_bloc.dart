@@ -24,6 +24,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<ToggleTaskCompletedEvent>(_onToggleTaskCompleted);
     on<DeleteTaskEvent>(_onDeleteTask);
     on<CreateTaskEvent>(_onCreateTask);
+    on<EditTaskEvent>(_onEditTask);
 
     // Automatically load tasks when BLoC is created
     add(GetTasksEvent());
@@ -75,6 +76,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     try {
       await createTaskUseCase.call(event.task);
+      // Refresh the list
+      add(GetTasksEvent());
+    } catch (e) {
+      emit(TaskError(e.toString()));
+    }
+  }
+
+  Future<void> _onEditTask(EditTaskEvent event, Emitter<TaskState> emit) async {
+    try {
+      await editTaskUseCase.call(event.task);
       // Refresh the list
       add(GetTasksEvent());
     } catch (e) {

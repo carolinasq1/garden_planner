@@ -21,3 +21,9 @@ class CreateTaskEvent extends TaskEvent {
 
   CreateTaskEvent(this.task);
 }
+
+class EditTaskEvent extends TaskEvent {
+  final Task task;
+
+  EditTaskEvent(this.task);
+}

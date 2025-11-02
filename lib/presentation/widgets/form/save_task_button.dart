@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-class CreateTaskButton extends StatelessWidget {
+class SaveTaskButton extends StatelessWidget {
   final VoidCallback onPressed;
+  final bool isEditing;
 
-  const CreateTaskButton({
+  const SaveTaskButton({
     super.key,
     required this.onPressed,
+    this.isEditing = false,
   });
 
   @override
@@ -15,8 +17,7 @@ class CreateTaskButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      child: const Text('Create Task'),
+      child: Text(isEditing ? 'Update Task' : 'Create Task'),
     );
   }
 }
-

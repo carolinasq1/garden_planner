@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/task.dart';
 import '../../bloc/task_bloc.dart';
+import '../../pages/task_form_page.dart';
 import '../../widgets/delete_task_dialog.dart';
+import 'toggle_task_completion_button.dart';
 
 class TaskListItem extends StatelessWidget {
   final Task task;
@@ -30,12 +32,17 @@ class TaskListItem extends StatelessWidget {
       child: ListTile(
         title: Text(task.name),
         subtitle: task.description != null ? Text(task.description!) : null,
-        leading: Icon(
-          task.isCompleted ? Icons.local_florist : Icons.local_florist_outlined,
-          color: task.isCompleted ? Colors.green : Colors.grey,
-        ),
+        leading: ToggleTaskCompletionButton(task: task),
         onTap: () {
-          context.read<TaskBloc>().add(ToggleTaskCompletedEvent(task));
+          final bloc = BlocProvider.of<TaskBloc>(context);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => BlocProvider.value(
+                value: bloc,
+                child: TaskFormPage(task: task),
+              ),
+            ),
+          );
         },
       ),
     );

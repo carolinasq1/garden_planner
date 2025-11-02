@@ -4,10 +4,12 @@ import '../../domain/entities/task.dart';
 import '../bloc/task_bloc.dart';
 import '../widgets/form/task_name_field.dart';
 import '../widgets/form/task_description_field.dart';
-import '../widgets/form/create_task_button.dart';
+import '../widgets/form/save_task_button.dart';
 
 class TaskFormPage extends StatefulWidget {
-  const TaskFormPage({super.key});
+  final Task? task;
+
+  const TaskFormPage({super.key, this.task});
 
   @override
   State<TaskFormPage> createState() => _TaskFormPageState();
@@ -15,8 +17,19 @@ class TaskFormPage extends StatefulWidget {
 
 class _TaskFormPageState extends State<TaskFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
+
+  bool get _isEditing => widget.task != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.task?.name ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.task?.description ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -31,17 +44,35 @@ class _TaskFormPageState extends State<TaskFormPage> {
       final description = _descriptionController.text.trim();
       final descriptionOrNull = description.isEmpty ? null : description;
 
-      final newTask = Task(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: name,
-        description: descriptionOrNull,
-        isCompleted: false,
-        createdAt: DateTime.now(),
-      );
-
-      context.read<TaskBloc>().add(CreateTaskEvent(newTask));
+      if (_isEditing) {
+        _updateTask(name, descriptionOrNull);
+      } else {
+        _createTask(name, descriptionOrNull);
+      }
       Navigator.of(context).pop();
     }
+  }
+
+  void _createTask(String name, String? description) {
+    final newTask = Task(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      description: description,
+      isCompleted: false,
+      createdAt: DateTime.now(),
+    );
+
+    context.read<TaskBloc>().add(CreateTaskEvent(newTask));
+  }
+
+  void _updateTask(String name, String? description) {
+    final updatedTask = widget.task!.copyWith(
+      name: name,
+      description: description,
+      updatedAt: DateTime.now(),
+    );
+
+    context.read<TaskBloc>().add(EditTaskEvent(updatedTask));
   }
 
   @override
@@ -55,18 +86,21 @@ class _TaskFormPageState extends State<TaskFormPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('New Task')),
+        appBar: AppBar(title: Text(_isEditing ? 'Edit Task' : 'New Task')),
         body: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              TaskNameField(controller: _nameController),
+              TaskNameField(
+                controller: _nameController,
+                autofocus: !_isEditing,
+              ),
               const SizedBox(height: 24),
               TaskDescriptionField(controller: _descriptionController),
               const SizedBox(height: 24),
-              CreateTaskButton(onPressed: _saveTask),
+              SaveTaskButton(onPressed: _saveTask, isEditing: _isEditing),
             ],
           ),
         ),

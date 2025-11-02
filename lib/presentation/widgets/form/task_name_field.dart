@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class TaskNameField extends StatelessWidget {
   final TextEditingController controller;
+  final bool autofocus;
 
   const TaskNameField({
     super.key,
     required this.controller,
+    this.autofocus = false,
   });
 
   @override
@@ -18,7 +20,7 @@ class TaskNameField extends StatelessWidget {
         border: OutlineInputBorder(),
       ),
       textCapitalization: TextCapitalization.sentences,
-      autofocus: true,
+      autofocus: autofocus,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Name is required';
