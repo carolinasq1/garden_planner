@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/task.dart';
-import '../bloc/task_bloc.dart';
-import 'delete_task_dialog.dart';
+import '../../../domain/entities/task.dart';
+import '../../bloc/task_bloc.dart';
+import '../../widgets/delete_task_dialog.dart';
 
 class TaskListItem extends StatelessWidget {
   final Task task;

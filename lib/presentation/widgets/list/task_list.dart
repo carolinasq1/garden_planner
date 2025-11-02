@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/task_bloc.dart';
+import '../../bloc/task_bloc.dart';
 import 'task_list_item.dart';
-import '../../domain/entities/task.dart';
+import '../../../domain/entities/task.dart';
 
 class TaskListWidget extends StatelessWidget {
   final List<Task> tasks;
