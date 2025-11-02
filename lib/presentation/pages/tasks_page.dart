@@ -24,34 +24,33 @@ class TasksPage extends StatelessWidget {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Garden Tasks'),
+          title: const Text('Garden Planner'),
           scrolledUnderElevation: 0,
           bottom: const TaskSearchBar(),
         ),
         floatingActionButton: const AddTaskButton(),
-        body: Column(
-          children: [
-            const TaskFilterBar(),
-            const TaskSortBar(),
-            Expanded(
-              child: BlocBuilder<TaskBloc, TaskState>(
-                builder: (context, state) {
-                  return switch (state) {
-                    TaskLoading() => const TaskLoadingWidget(),
-                    TaskLoaded(
-                      :final taskCount,
-                    ) =>
-                      TasksListContent(
+        body: SafeArea(
+          child: Column(
+            children: [
+              const TaskFilterBar(),
+              const TaskSortBar(),
+              Expanded(
+                child: BlocBuilder<TaskBloc, TaskState>(
+                  builder: (context, state) {
+                    return switch (state) {
+                      TaskLoading() => const TaskLoadingWidget(),
+                      TaskLoaded(:final taskCount) => TasksListContent(
                         taskCount: taskCount,
                       ),
-                    TaskError(message: final message) => TaskErrorWidget(
-                      message: message,
-                    ),
-                  };
-                },
+                      TaskError(message: final message) => TaskErrorWidget(
+                        message: message,
+                      ),
+                    };
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
