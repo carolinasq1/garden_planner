@@ -34,3 +34,9 @@ class SearchTasksEvent extends TaskEvent {
 
   SearchTasksEvent(this.query);
 }
+
+class FilterTasksEvent extends TaskEvent {
+  final TaskFilterType filterType;
+
+  FilterTasksEvent(this.filterType);
+}

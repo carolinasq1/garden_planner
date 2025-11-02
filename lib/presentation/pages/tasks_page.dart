@@ -6,8 +6,10 @@ import '../widgets/list/task_empty_widget.dart';
 import '../widgets/list/task_error_widget.dart';
 import '../widgets/list/task_loading_widget.dart';
 import '../widgets/add_task_button.dart';
-import '../../core/di/injection_container.dart' as di;
 import '../widgets/search/task_search_bar.dart';
+import '../widgets/filter_sort/task_filter_bar.dart';
+import '../widgets/filter_sort/task_sort_bar.dart';
+import '../../core/di/injection_container.dart' as di;
 
 class TasksPage extends StatelessWidget {
   const TasksPage({super.key});
@@ -34,19 +36,27 @@ class TasksPage extends StatelessWidget {
           ),
         ),
         floatingActionButton: const AddTaskButton(),
-        body: BlocBuilder<TaskBloc, TaskState>(
-          builder: (context, state) {
-            return switch (state) {
-              TaskLoading() => const TaskLoadingWidget(),
-              TaskLoaded(tasks: final tasks) =>
-                tasks.isEmpty
-                    ? const TaskEmptyWidget()
-                    : TaskListWidget(tasks: tasks),
-              TaskError(message: final message) => TaskErrorWidget(
-                message: message,
+        body: Column(
+          children: [
+            const TaskFilterBar(),
+            const TaskSortBar(),
+            Expanded(
+              child: BlocBuilder<TaskBloc, TaskState>(
+                builder: (context, state) {
+                  return switch (state) {
+                    TaskLoading() => const TaskLoadingWidget(),
+                    TaskLoaded(tasks: final tasks) =>
+                      tasks.isEmpty
+                          ? const TaskEmptyWidget()
+                          : TaskListWidget(tasks: tasks),
+                    TaskError(message: final message) => TaskErrorWidget(
+                      message: message,
+                    ),
+                  };
+                },
               ),
-            };
-          },
+            ),
+          ],
         ),
       ),
     );
