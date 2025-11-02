@@ -33,69 +33,12 @@ class TaskRepositoryImpl implements TaskRepository {
     int page = 1,
     int pageSize = 10,
   }) async {
-    // Get base tasks (either all tasks or search results)
-    final tasks = query != null && query.isNotEmpty
-        ? await localDataSource.searchTasks(query)
-        : await localDataSource.getAllTasks();
-
-    // Apply filter
-    final filteredTasks = _applyFilter(tasks, filterType);
-    final taskCount = filteredTasks.length;
-
-    // Apply sort
-    final sortedTasks = _applySort(filteredTasks, sortType);
-
-    // Apply pagination
-    final startIndex = (page - 1) * pageSize;
-    final endIndex = startIndex + pageSize;
-
-    final paginatedTasks = startIndex >= sortedTasks.length
-        ? <Task>[]
-        : sortedTasks.sublist(
-            startIndex,
-            endIndex > sortedTasks.length ? sortedTasks.length : endIndex,
-          );
-
-    return TasksResult(tasks: paginatedTasks, taskCount: taskCount);
-  }
-
-  List<Task> _applyFilter(List<Task> tasks, TaskFilterType filterType) {
-    switch (filterType) {
-      case TaskFilterType.all:
-        return tasks;
-      case TaskFilterType.completed:
-        return tasks.where((task) => task.isCompleted).toList();
-      case TaskFilterType.incomplete:
-        return tasks.where((task) => !task.isCompleted).toList();
-    }
-  }
-
-  List<Task> _applySort(List<Task> tasks, TaskSortType sortType) {
-    final sortedTasks = List<Task>.from(tasks);
-    switch (sortType) {
-      case TaskSortType.dateCreated:
-        sortedTasks.sort((a, b) {
-          // Sort by creation date, newest first
-          return b.createdAt.compareTo(a.createdAt);
-        });
-        break;
-      case TaskSortType.alphabetical:
-        sortedTasks.sort((a, b) {
-          // Sort alphabetically by name
-          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-        });
-        break;
-      case TaskSortType.completionStatus:
-        sortedTasks.sort((a, b) {
-          // Sort by completion status (incomplete first, then completed)
-          if (a.isCompleted == b.isCompleted) {
-            // If same status, sort by creation date
-            return b.createdAt.compareTo(a.createdAt);
-          }
-          return a.isCompleted ? 1 : -1;
-        });
-        break;
-    }
-    return sortedTasks;
+    return await localDataSource.getTasksPaginated(
+      query: query,
+      filterType: filterType,
+      sortType: sortType,
+      page: page,
+      pageSize: pageSize,
+    );
   }
 }
