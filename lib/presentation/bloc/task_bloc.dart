@@ -36,8 +36,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<SearchTasksEvent>(_onSearchTasks);
     on<FilterTasksEvent>(_onFilterTasks);
     on<SortTasksEvent>(_onSortTasks);
-    on<NextPageEvent>(_onNextPage);
-    on<PreviousPageEvent>(_onPreviousPage);
+    on<LoadMoreTasksEvent>(_onLoadMoreTasks);
 
     // Automatically load tasks when BLoC is created
     add(GetTasksEvent());
@@ -46,8 +45,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onGetTasks(TaskEvent event, Emitter<TaskState> emit) async {
     emit(TaskLoading());
     _currentSearchQuery = null;
-    _currentPage = 1;
-    await _refreshTasks(emit);
+    await _resetAndRefreshTasks(emit);
   }
 
   Future<void> _onCreateTask(
@@ -57,7 +55,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     emit(TaskLoading());
     try {
       await createTaskUseCase.call(event.name, event.description);
-      await _refreshTasks(emit);
+      await _resetAndRefreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
     }
@@ -67,7 +65,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     emit(TaskLoading());
     try {
       await editTaskUseCase.call(event.task);
-      await _refreshTasks(emit);
+      await _resetAndRefreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
     }
@@ -84,7 +82,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         updatedAt: DateTime.now(),
       );
       await editTaskUseCase.call(updatedTask);
-      await _refreshTasks(emit);
+      await _resetAndRefreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
     }
@@ -97,7 +95,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     emit(TaskLoading());
     try {
       await deleteTaskUseCase.call(event.taskId);
-      await _refreshTasks(emit);
+      await _resetAndRefreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
     }
@@ -111,8 +109,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     _currentSearchQuery = event.query.trim().isEmpty
         ? null
         : event.query.trim();
-    _currentPage = 1;
-    await _refreshTasks(emit);
+    await _resetAndRefreshTasks(emit);
   }
 
   Future<void> _onFilterTasks(
@@ -121,8 +118,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     emit(TaskLoading());
     _currentFilterType = event.filterType;
-    _currentPage = 1;
-    await _refreshTasks(emit);
+    await _resetAndRefreshTasks(emit);
   }
 
   Future<void> _onSortTasks(
@@ -131,28 +127,55 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     emit(TaskLoading());
     _currentSortType = event.sortType;
-    _currentPage = 1;
-    await _refreshTasks(emit);
+    await _resetAndRefreshTasks(emit);
   }
 
-  Future<void> _onNextPage(NextPageEvent event, Emitter<TaskState> emit) async {
-    final currentState = state;
-    if (currentState is TaskLoaded && _currentPage < currentState.totalPages) {
-      emit(TaskLoading());
-      _currentPage++;
-      await _refreshTasks(emit);
-    }
-  }
-
-  Future<void> _onPreviousPage(
-    PreviousPageEvent event,
+  Future<void> _onLoadMoreTasks(
+    LoadMoreTasksEvent event,
     Emitter<TaskState> emit,
   ) async {
-    if (_currentPage > 1) {
-      emit(TaskLoading());
-      _currentPage--;
-      await _refreshTasks(emit);
+    final currentState = state;
+
+    if (currentState is TaskLoaded &&
+        currentState.tasks.length < currentState.taskCount &&
+        !currentState.isLoadingMore) {
+      final currentTasks = currentState.tasks;
+
+      _currentPage++;
+
+      emit(
+        TaskLoaded(
+          tasks: currentTasks,
+          taskCount: currentState.taskCount,
+          isLoadingMore: true,
+        ),
+      );
+
+      try {
+        final result = await getTasksUseCase.call(
+          query: _currentSearchQuery,
+          filterType: _currentFilterType,
+          sortType: _currentSortType,
+          page: _currentPage,
+          pageSize: _pageSize,
+        );
+
+        emit(
+          TaskLoaded(
+            tasks: [...currentTasks, ...result.tasks],
+            taskCount: result.taskCount,
+            isLoadingMore: false,
+          ),
+        );
+      } catch (e) {
+        emit(TaskError(e.toString()));
+      }
     }
+  }
+
+  Future<void> _resetAndRefreshTasks(Emitter<TaskState> emit) async {
+    _currentPage = 1;
+    await _refreshTasks(emit);
   }
 
   Future<void> _refreshTasks(Emitter<TaskState> emit) async {
@@ -165,14 +188,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         pageSize: _pageSize,
       );
 
-      final totalPages = (result.taskCount / _pageSize).ceil();
-
       emit(
         TaskLoaded(
           tasks: result.tasks,
           taskCount: result.taskCount,
-          currentPage: _currentPage,
-          totalPages: totalPages == 0 ? 1 : totalPages,
+          isLoadingMore: false,
         ),
       );
     } catch (e) {

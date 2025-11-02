@@ -7,14 +7,12 @@ class TaskLoading extends TaskState {}
 class TaskLoaded extends TaskState {
   final List<Task> tasks;
   final int taskCount;
-  final int currentPage;
-  final int totalPages;
+  final bool isLoadingMore;
 
   TaskLoaded({
     required this.tasks,
     required this.taskCount,
-    required this.currentPage,
-    required this.totalPages,
+    this.isLoadingMore = false,
   });
 }
 

@@ -39,16 +39,10 @@ class TasksPage extends StatelessWidget {
                   return switch (state) {
                     TaskLoading() => const TaskLoadingWidget(),
                     TaskLoaded(
-                      :final tasks,
                       :final taskCount,
-                      :final currentPage,
-                      :final totalPages,
                     ) =>
                       TasksListContent(
-                        tasks: tasks,
                         taskCount: taskCount,
-                        currentPage: currentPage,
-                        totalPages: totalPages,
                       ),
                     TaskError(message: final message) => TaskErrorWidget(
                       message: message,
