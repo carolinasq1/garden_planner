@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/task_bloc.dart';
 import '../widgets/list/task_list.dart';
-import '../widgets/list/task_empty_state.dart';
-import '../widgets/list/task_error_state.dart';
-import '../widgets/list/task_loading_state.dart';
+import '../widgets/list/task_empty_widget.dart';
+import '../widgets/list/task_error_widget.dart';
+import '../widgets/list/task_loading_widget.dart';
 import '../widgets/add_task_button.dart';
 import '../../core/di/injection_container.dart' as di;
 
@@ -26,12 +26,12 @@ class TasksPage extends StatelessWidget {
         body: BlocBuilder<TaskBloc, TaskState>(
           builder: (context, state) {
             return switch (state) {
-              TaskLoading() => const TaskLoadingState(),
+              TaskLoading() => const TaskLoadingWidget(),
               TaskLoaded(tasks: final tasks) =>
                 tasks.isEmpty
-                    ? const TaskEmptyState()
+                    ? const TaskEmptyWidget()
                     : TaskListWidget(tasks: tasks),
-              TaskError(message: final message) => TaskErrorState(
+              TaskError(message: final message) => TaskErrorWidget(
                 message: message,
               ),
             };
