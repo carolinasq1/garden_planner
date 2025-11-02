@@ -5,9 +5,7 @@ import '../datasources/task_local_data_source.dart';
 class TaskRepositoryImpl implements TaskRepository {
   final TaskLocalDataSource localDataSource;
 
-  TaskRepositoryImpl({
-    required this.localDataSource,
-  });
+  TaskRepositoryImpl({required this.localDataSource});
 
   @override
   Future<List<Task>> getAllTasks() async {
@@ -33,5 +31,9 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<void> deleteTask(String taskId) async {
     return await localDataSource.deleteTask(taskId);
   }
-}
 
+  @override
+  Future<List<Task>> searchTasks(String query) async {
+    return await localDataSource.searchTasks(query);
+  }
+}

@@ -7,6 +7,7 @@ import '../widgets/list/task_error_widget.dart';
 import '../widgets/list/task_loading_widget.dart';
 import '../widgets/add_task_button.dart';
 import '../../core/di/injection_container.dart' as di;
+import '../widgets/search/task_search_bar.dart';
 
 class TasksPage extends StatelessWidget {
   const TasksPage({super.key});
@@ -19,9 +20,19 @@ class TasksPage extends StatelessWidget {
         editTaskUseCase: di.getIt(),
         deleteTaskUseCase: di.getIt(),
         createTaskUseCase: di.getIt(),
+        searchTasksUseCase: di.getIt(),
       ),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Garden Tasks')),
+        appBar: AppBar(
+          title: const Text('Garden Tasks'),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(50),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: const TaskSearchBar(),
+            ),
+          ),
+        ),
         floatingActionButton: const AddTaskButton(),
         body: BlocBuilder<TaskBloc, TaskState>(
           builder: (context, state) {

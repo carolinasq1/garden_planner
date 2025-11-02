@@ -37,5 +37,21 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   Future<void> deleteTask(String taskId) async {
     await taskBox.delete(taskId);
   }
-}
 
+  @override
+  Future<List<Task>> searchTasks(String query) async {
+    final allTasks = await getAllTasks();
+    final lowerCaseQuery = query.toLowerCase().trim();
+
+    if (lowerCaseQuery.isEmpty) {
+      return allTasks;
+    }
+
+    return allTasks.where((task) {
+      final nameMatch = task.name.toLowerCase().contains(lowerCaseQuery);
+      final descriptionMatch =
+          task.description?.toLowerCase().contains(lowerCaseQuery) ?? false;
+      return nameMatch || descriptionMatch;
+    }).toList();
+  }
+}

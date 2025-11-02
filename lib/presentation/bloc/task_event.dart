@@ -28,3 +28,9 @@ class EditTaskEvent extends TaskEvent {
 
   EditTaskEvent(this.task);
 }
+
+class SearchTasksEvent extends TaskEvent {
+  final String query;
+
+  SearchTasksEvent(this.query);
+}
