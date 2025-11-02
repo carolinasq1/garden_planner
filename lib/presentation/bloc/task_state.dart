@@ -6,8 +6,16 @@ class TaskLoading extends TaskState {}
 
 class TaskLoaded extends TaskState {
   final List<Task> tasks;
+  final int taskCount;
+  final int currentPage;
+  final int totalPages;
 
-  TaskLoaded(this.tasks);
+  TaskLoaded({
+    required this.tasks,
+    required this.taskCount,
+    required this.currentPage,
+    required this.totalPages,
+  });
 }
 
 class TaskError extends TaskState {

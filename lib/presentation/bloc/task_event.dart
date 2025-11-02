@@ -46,3 +46,7 @@ class SortTasksEvent extends TaskEvent {
 
   SortTasksEvent(this.sortType);
 }
+
+class NextPageEvent extends TaskEvent {}
+
+class PreviousPageEvent extends TaskEvent {}

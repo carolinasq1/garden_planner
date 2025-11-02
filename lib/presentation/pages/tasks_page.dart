@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/task_bloc.dart';
-import '../widgets/list/task_list.dart';
-import '../widgets/list/task_empty_widget.dart';
 import '../widgets/list/task_error_widget.dart';
 import '../widgets/list/task_loading_widget.dart';
+import '../widgets/list/tasks_list_content.dart';
 import '../widgets/add_task_button.dart';
 import '../widgets/search/task_search_bar.dart';
 import '../widgets/filter_sort/task_filter_bar.dart';
@@ -26,13 +25,8 @@ class TasksPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Garden Tasks'),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(50),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: const TaskSearchBar(),
-            ),
-          ),
+          scrolledUnderElevation: 0,
+          bottom: const TaskSearchBar(),
         ),
         floatingActionButton: const AddTaskButton(),
         body: Column(
@@ -44,10 +38,18 @@ class TasksPage extends StatelessWidget {
                 builder: (context, state) {
                   return switch (state) {
                     TaskLoading() => const TaskLoadingWidget(),
-                    TaskLoaded(tasks: final tasks) =>
-                      tasks.isEmpty
-                          ? const TaskEmptyWidget()
-                          : TaskListWidget(tasks: tasks),
+                    TaskLoaded(
+                      :final tasks,
+                      :final taskCount,
+                      :final currentPage,
+                      :final totalPages,
+                    ) =>
+                      TasksListContent(
+                        tasks: tasks,
+                        taskCount: taskCount,
+                        currentPage: currentPage,
+                        totalPages: totalPages,
+                      ),
                     TaskError(message: final message) => TaskErrorWidget(
                       message: message,
                     ),

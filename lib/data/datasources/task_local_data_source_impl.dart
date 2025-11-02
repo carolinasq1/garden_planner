@@ -15,13 +15,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   }
 
   @override
-  Future<Task?> getTaskById(String taskId) async {
-    final taskModel = taskBox.get(taskId);
-    if (taskModel == null) return null;
-    return taskModel.toEntity();
-  }
-
-  @override
   Future<void> createTask(Task task) async {
     final taskModel = TaskModel.fromEntity(task);
     await taskBox.put(task.id, taskModel);

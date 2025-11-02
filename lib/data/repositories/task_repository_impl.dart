@@ -1,6 +1,7 @@
 import '../../domain/entities/task.dart';
 import '../../domain/entities/task_filter_type.dart';
 import '../../domain/entities/task_sort_type.dart';
+import '../../domain/entities/tasks_result.dart';
 import '../../domain/repositories/task_repository.dart';
 import '../datasources/task_local_data_source.dart';
 
@@ -8,11 +9,6 @@ class TaskRepositoryImpl implements TaskRepository {
   final TaskLocalDataSource localDataSource;
 
   TaskRepositoryImpl({required this.localDataSource});
-
-  @override
-  Future<Task?> getTaskById(String taskId) async {
-    return await localDataSource.getTaskById(taskId);
-  }
 
   @override
   Future<void> createTask(Task task) async {
@@ -30,10 +26,12 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<List<Task>> getTasks({
+  Future<TasksResult> getTasks({
     String? query,
     TaskFilterType filterType = TaskFilterType.all,
     TaskSortType sortType = TaskSortType.dateCreated,
+    int page = 1,
+    int pageSize = 10,
   }) async {
     // Get base tasks (either all tasks or search results)
     final tasks = query != null && query.isNotEmpty
@@ -42,11 +40,23 @@ class TaskRepositoryImpl implements TaskRepository {
 
     // Apply filter
     final filteredTasks = _applyFilter(tasks, filterType);
+    final taskCount = filteredTasks.length;
 
     // Apply sort
     final sortedTasks = _applySort(filteredTasks, sortType);
 
-    return sortedTasks;
+    // Apply pagination
+    final startIndex = (page - 1) * pageSize;
+    final endIndex = startIndex + pageSize;
+
+    final paginatedTasks = startIndex >= sortedTasks.length
+        ? <Task>[]
+        : sortedTasks.sublist(
+            startIndex,
+            endIndex > sortedTasks.length ? sortedTasks.length : endIndex,
+          );
+
+    return TasksResult(tasks: paginatedTasks, taskCount: taskCount);
   }
 
   List<Task> _applyFilter(List<Task> tasks, TaskFilterType filterType) {

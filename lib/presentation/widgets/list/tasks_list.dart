@@ -4,10 +4,10 @@ import '../../bloc/task_bloc.dart';
 import 'task_list_item.dart';
 import '../../../domain/entities/task.dart';
 
-class TaskListWidget extends StatelessWidget {
+class TasksList extends StatelessWidget {
   final List<Task> tasks;
 
-  const TaskListWidget({super.key, required this.tasks});
+  const TasksList({super.key, required this.tasks});
 
   @override
   Widget build(BuildContext context) {
