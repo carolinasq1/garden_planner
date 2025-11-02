@@ -1,31 +1,30 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/task.dart';
 import '../../domain/entities/task_filter_type.dart';
-import '../../domain/use_cases/get_all_tasks_use_case.dart';
+import '../../domain/entities/task_sort_type.dart';
+import '../../domain/use_cases/get_tasks_use_case.dart';
 import '../../domain/use_cases/edit_task_use_case.dart';
 import '../../domain/use_cases/delete_task_use_case.dart';
 import '../../domain/use_cases/create_task_use_case.dart';
-import '../../domain/use_cases/search_tasks_use_case.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';
 
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
-  final GetAllTasksUseCase getAllTasksUseCase;
+  final GetTasksUseCase getTasksUseCase;
   final EditTaskUseCase editTaskUseCase;
   final DeleteTaskUseCase deleteTaskUseCase;
   final CreateTaskUseCase createTaskUseCase;
-  final SearchTasksUseCase searchTasksUseCase;
 
   String? _currentSearchQuery;
   TaskFilterType _currentFilterType = TaskFilterType.all;
+  TaskSortType _currentSortType = TaskSortType.dateCreated;
 
   TaskBloc({
-    required this.getAllTasksUseCase,
+    required this.getTasksUseCase,
     required this.editTaskUseCase,
     required this.deleteTaskUseCase,
     required this.createTaskUseCase,
-    required this.searchTasksUseCase,
   }) : super(TaskLoading()) {
     on<GetTasksEvent>(_onGetTasks);
     on<ToggleTaskCompletedEvent>(_onToggleTaskCompleted);
@@ -34,6 +33,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<EditTaskEvent>(_onEditTask);
     on<SearchTasksEvent>(_onSearchTasks);
     on<FilterTasksEvent>(_onFilterTasks);
+    on<SortTasksEvent>(_onSortTasks);
 
     // Automatically load tasks when BLoC is created
     add(GetTasksEvent());
@@ -41,32 +41,28 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onGetTasks(TaskEvent event, Emitter<TaskState> emit) async {
     emit(TaskLoading());
-    try {
-      _currentSearchQuery = null;
-      final tasks = await getAllTasksUseCase.call();
-      final filteredTasks = _applyFilter(tasks);
-      emit(TaskLoaded(filteredTasks));
-    } catch (e) {
-      emit(TaskError(e.toString()));
-    }
+    _currentSearchQuery = null;
+    await _refreshTasks(emit);
   }
 
   Future<void> _onCreateTask(
     CreateTaskEvent event,
     Emitter<TaskState> emit,
   ) async {
+    emit(TaskLoading());
     try {
       await createTaskUseCase.call(event.name, event.description);
-      _refreshTasksList();
+      await _refreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
     }
   }
 
   Future<void> _onEditTask(EditTaskEvent event, Emitter<TaskState> emit) async {
+    emit(TaskLoading());
     try {
       await editTaskUseCase.call(event.task);
-      _refreshTasksList();
+      await _refreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
     }
@@ -76,13 +72,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     ToggleTaskCompletedEvent event,
     Emitter<TaskState> emit,
   ) async {
+    emit(TaskLoading());
     try {
       final updatedTask = event.task.copyWith(
         isCompleted: !event.task.isCompleted,
         updatedAt: DateTime.now(),
       );
       await editTaskUseCase.call(updatedTask);
-      _refreshTasksList();
+      await _refreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
     }
@@ -92,19 +89,12 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     DeleteTaskEvent event,
     Emitter<TaskState> emit,
   ) async {
+    emit(TaskLoading());
     try {
       await deleteTaskUseCase.call(event.taskId);
-      _refreshTasksList();
+      await _refreshTasks(emit);
     } catch (e) {
       emit(TaskError(e.toString()));
-    }
-  }
-
-  void _refreshTasksList() {
-    if (_currentSearchQuery != null && _currentSearchQuery!.isNotEmpty) {
-      add(SearchTasksEvent(_currentSearchQuery!));
-    } else {
-      add(GetTasksEvent());
     }
   }
 
@@ -113,34 +103,40 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     Emitter<TaskState> emit,
   ) async {
     emit(TaskLoading());
-    try {
-      _currentSearchQuery = event.query.trim().isEmpty
-          ? null
-          : event.query.trim();
-      final tasks = await searchTasksUseCase.call(event.query);
-      final filteredTasks = _applyFilter(tasks);
-      emit(TaskLoaded(filteredTasks));
-    } catch (e) {
-      emit(TaskError(e.toString()));
-    }
+    _currentSearchQuery = event.query.trim().isEmpty
+        ? null
+        : event.query.trim();
+    await _refreshTasks(emit);
   }
 
   Future<void> _onFilterTasks(
     FilterTasksEvent event,
     Emitter<TaskState> emit,
   ) async {
+    emit(TaskLoading());
     _currentFilterType = event.filterType;
-    _refreshTasksList();
+    await _refreshTasks(emit);
   }
 
-  List<Task> _applyFilter(List<Task> tasks) {
-    switch (_currentFilterType) {
-      case TaskFilterType.all:
-        return tasks;
-      case TaskFilterType.completed:
-        return tasks.where((task) => task.isCompleted).toList();
-      case TaskFilterType.incomplete:
-        return tasks.where((task) => !task.isCompleted).toList();
+  Future<void> _onSortTasks(
+    SortTasksEvent event,
+    Emitter<TaskState> emit,
+  ) async {
+    emit(TaskLoading());
+    _currentSortType = event.sortType;
+    await _refreshTasks(emit);
+  }
+
+  Future<void> _refreshTasks(Emitter<TaskState> emit) async {
+    try {
+      final tasks = await getTasksUseCase.call(
+        query: _currentSearchQuery,
+        filterType: _currentFilterType,
+        sortType: _currentSortType,
+      );
+      emit(TaskLoaded(tasks));
+    } catch (e) {
+      emit(TaskError(e.toString()));
     }
   }
 }

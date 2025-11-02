@@ -18,11 +18,10 @@ class TasksPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => TaskBloc(
-        getAllTasksUseCase: di.getIt(),
+        getTasksUseCase: di.getIt(),
         editTaskUseCase: di.getIt(),
         deleteTaskUseCase: di.getIt(),
         createTaskUseCase: di.getIt(),
-        searchTasksUseCase: di.getIt(),
       ),
       child: Scaffold(
         appBar: AppBar(

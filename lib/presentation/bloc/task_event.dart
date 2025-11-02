@@ -40,3 +40,9 @@ class FilterTasksEvent extends TaskEvent {
 
   FilterTasksEvent(this.filterType);
 }
+
+class SortTasksEvent extends TaskEvent {
+  final TaskSortType sortType;
+
+  SortTasksEvent(this.sortType);
+}
