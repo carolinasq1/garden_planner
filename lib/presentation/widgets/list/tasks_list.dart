@@ -51,7 +51,6 @@ class _TasksListState extends State<TasksList> {
             itemCount: tasks.length + (loadedState.isLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == tasks.length) {
-                // Show loading indicator at the bottom
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
@@ -59,7 +58,10 @@ class _TasksListState extends State<TasksList> {
                   ),
                 );
               } else {
-                return TaskListItem(task: tasks[index]);
+                return TaskListItem(
+                  key: ValueKey(tasks[index].id),
+                  task: tasks[index],
+                );
               }
             },
           );
