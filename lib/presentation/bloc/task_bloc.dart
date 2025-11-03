@@ -75,16 +75,48 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     ToggleTaskCompletedEvent event,
     Emitter<TaskState> emit,
   ) async {
-    emit(TaskLoading());
     try {
       final updatedTask = event.task.copyWith(
         isCompleted: !event.task.isCompleted,
         updatedAt: DateTime.now(),
       );
       await editTaskUseCase.call(updatedTask);
-      await _resetAndRefreshTasks(emit);
+
+      final currentState = state;
+      if (currentState is TaskLoaded) {
+        // Check if task still matches current filter after toggle
+        final matchesFilter = _matchesFilter(updatedTask, _currentFilterType);
+
+        if (matchesFilter) {
+          final updatedTasks = currentState.tasks.map((task) {
+            return task.id == updatedTask.id ? updatedTask : task;
+          }).toList();
+
+          emit(
+            TaskLoaded(
+              tasks: updatedTasks,
+              taskCount: currentState.taskCount,
+              isLoadingMore: false,
+            ),
+          );
+        } else {
+          // refresh the state list
+          await _resetAndRefreshTasks(emit);
+        }
+      }
     } catch (e) {
       emit(TaskError(e.toString()));
+    }
+  }
+
+  bool _matchesFilter(Task task, TaskFilterType filterType) {
+    switch (filterType) {
+      case TaskFilterType.all:
+        return true;
+      case TaskFilterType.completed:
+        return task.isCompleted;
+      case TaskFilterType.incomplete:
+        return !task.isCompleted;
     }
   }
 
@@ -92,10 +124,29 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     DeleteTaskEvent event,
     Emitter<TaskState> emit,
   ) async {
-    emit(TaskLoading());
     try {
       await deleteTaskUseCase.call(event.taskId);
-      await _resetAndRefreshTasks(emit);
+
+      final currentState = state;
+      if (currentState is TaskLoaded) {
+        final updatedTasks = currentState.tasks
+            .where((task) => task.id != event.taskId)
+            .toList();
+        final updatedCount = currentState.taskCount - 1;
+
+        // If list is empty, remaining tasks can be on different pages
+        if (updatedTasks.isEmpty) {
+          await _resetAndRefreshTasks(emit);
+        } else {
+          emit(
+            TaskLoaded(
+              tasks: updatedTasks,
+              taskCount: updatedCount,
+              isLoadingMore: false,
+            ),
+          );
+        }
+      }
     } catch (e) {
       emit(TaskError(e.toString()));
     }
