@@ -27,7 +27,7 @@ class _TasksListState extends State<TasksList> {
   }
 
   void _onScroll() {
-    // Load more when user is 200px from bottom
+    // fetch more tasks when reaching the bottom
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       context.read<TaskBloc>().add(LoadMoreTasksEvent());

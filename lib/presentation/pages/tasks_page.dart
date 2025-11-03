@@ -8,6 +8,7 @@ import '../widgets/add_task_button.dart';
 import '../widgets/search/task_search_bar.dart';
 import '../widgets/filter_sort/task_filter_bar.dart';
 import '../widgets/filter_sort/task_sort_bar.dart';
+import '../widgets/weather/weather_icon_widget.dart';
 import '../../core/di/injection_container.dart' as di;
 
 class TasksPage extends StatelessWidget {
@@ -27,6 +28,9 @@ class TasksPage extends StatelessWidget {
           title: const Text('Garden Planner'),
           scrolledUnderElevation: 0,
           bottom: const TaskSearchBar(),
+          actions: const [
+            WeatherIconWidget(),
+          ],
         ),
         floatingActionButton: const AddTaskButton(),
         body: SafeArea(
