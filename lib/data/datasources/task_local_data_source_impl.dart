@@ -28,16 +28,14 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
     // Get all tasks from Hive
     final allTasks = taskBox.values.map((model) => model.toEntity()).toList();
 
-    // Apply search
+    // Apply filters, querie and sort
     final searchResults = query != null && query.isNotEmpty
         ? _applySearch(allTasks, query)
         : allTasks;
 
-    // Apply filter
     final filteredTasks = _applyFilter(searchResults, filterType);
     final taskCount = filteredTasks.length;
 
-    // Apply sort
     final sortedTasks = _applySort(filteredTasks, sortType);
 
     // Apply pagination
@@ -80,7 +78,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
     switch (sortType) {
       case TaskSortType.dateCreated:
         sortedTasks.sort((a, b) {
-          // Sort by creation date, newest first
           return b.createdAt.compareTo(a.createdAt);
         });
         break;
