@@ -31,6 +31,7 @@ class TaskListItem extends StatelessWidget {
       },
       child: ListTile(
         title: Text(task.name),
+        // I could limit the number of lines for very long descriptions
         subtitle: task.description != null ? Text(task.description!) : null,
         leading: ToggleTaskCompletionButton(task: task),
         onTap: () {

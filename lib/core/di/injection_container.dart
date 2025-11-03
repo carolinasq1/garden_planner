@@ -15,7 +15,6 @@ import '../../domain/use_cases/delete_task_use_case.dart';
 import '../../domain/use_cases/edit_task_use_case.dart';
 import '../../domain/use_cases/get_tasks_use_case.dart';
 import '../../domain/use_cases/get_weather_use_case.dart';
-import '../../presentation/bloc/weather_bloc.dart';
 import '../utils/mock_data.dart';
 
 final getIt = GetIt.instance;
@@ -51,10 +50,6 @@ Future<void> initializeDependencies() async {
 
   // Register dio
   getIt.registerLazySingleton<Dio>(() => Dio());
-
-  getIt.registerFactory<WeatherBloc>(
-    () => WeatherBloc(getWeatherUseCase: getIt()),
-  );
 
   // Add mock data if box is empty
   if (taskBox.isEmpty) {
